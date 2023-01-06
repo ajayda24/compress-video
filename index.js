@@ -2,7 +2,7 @@ const ffmpeg = require('fluent-ffmpeg')
 const ffmpegPath = require('ffmpeg-static').path
 const ffprobePath = require('ffprobe-static').path
 const path = require('path')
-const uuid = require('uuid/v3')
+const uuid = require('uuid').v3
 
 // video path
 const videoPath = path.join(__dirname, 'js.mp4')

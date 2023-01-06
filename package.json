@@ -3,6 +3,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "async": "^3.2.4",
     "ffmpeg": "^0.0.4",
+    "ffmpeg-static": "^5.1.0",
     "ffprobe-static": "^3.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "uuid": "^9.0.0",
