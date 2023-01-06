@@ -1,38 +1,28 @@
-const fs = require('fs')
-const path = require('path')
 const ffmpeg = require('fluent-ffmpeg')
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
+const ffmpegPath = require('ffmpeg-static').path
 const ffprobePath = require('ffprobe-static').path
+const path = require('path')
+const uuid = require('uuid/v3')
 
+// video path
+const videoPath = path.join(__dirname, 'js.mp4')
+// set ffmpeg path
 ffmpeg.setFfmpegPath(ffmpegPath)
 ffmpeg.setFfprobePath(ffprobePath)
 
-const videoPath = path.join(__dirname, 'js.mp4')
-
+/**
+ * Extract Metadata from a video
+ * @param {String} path
+ */
 function metadata(path) {
-  let stream = fs.createReadStream(path)
   return new Promise((resolve, reject) => {
-    ffmpeg(stream)
-      .input(path)
-      .ffprobe((err, metadata) => {
-        if (err) {
-          console.log(err)
-          reject(err)
-        }
-        resolve(metadata)
-      })
+    ffmpeg.ffprobe(path, (err, metadata) => {
+      if (err) {
+        reject(err)
+      }
+      resolve(metadata)
+    })
   })
-}
-
-function whatBitrate(bytes) {
-  const ONE_MB = 1000000
-  const BIT = 28 // i found that 28 are good point fell free to change it as you feel right
-  const diff = Math.floor(bytes / ONE_MB)
-  if (diff < 5) {
-    return 128
-  } else {
-    return Math.floor(diff * BIT * 1.1)
-  }
 }
 
 function command(input, output, bitrate) {
@@ -50,15 +40,27 @@ function command(input, output, bitrate) {
       })
       .on('error', (error) => reject(error))
       .on('end', () => resolve())
+      .run()
   })
 }
 
+function whatBitrate(bytes) {
+  const ONE_MB = 1000000
+  const BIT = 28 // i found that 28 are good point fell free to change it as you feel right
+  const diff = Math.floor(bytes / ONE_MB)
+  if (diff < 5) {
+    return 128
+  } else {
+    return Math.floor(diff * BIT * 1.1)
+  }
+}
+
+// this compress video based on bitrate
 async function compress() {
-  const name = 'compressed'
+  const name = uuid(videoPath, '1b671a64-40d5-491e-99b0-da01ff1f3341')
   const outputPath = path.join(__dirname, 'video', `${name}.mp4`)
   const inputMetadata = await metadata(videoPath)
   const bitrate = whatBitrate(inputMetadata.format.size)
-
   await command(videoPath, outputPath, bitrate)
   const outputMetadata = await metadata(outputPath)
 
